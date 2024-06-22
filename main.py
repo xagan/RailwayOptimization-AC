@@ -46,10 +46,10 @@ for station1 in stations:
         pheromones[(station1, station2)] = 1.0
 
 # Define the ACO parameters
-NUM_ANTS = 10
-ALPHA = 1.0
-BETA = 2.0
-RHO = 0.5
+NUM_ANTS = 75
+ALPHA = 4
+BETA = 3
+RHO = 0.8
 MAX_ITERATIONS = 2
 
 # Perform the ACO algorithm
@@ -164,6 +164,7 @@ for iteration in range(MAX_ITERATIONS):
 # map.save('railway_solution.html')
 
 
+# Initialize the map with the first station of the best path
 first_station = stations[best_path[0]]
 map = folium.Map(location=[first_station[0], first_station[1]], zoom_start=10)
 
