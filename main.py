@@ -4,7 +4,7 @@ import math
 import random
 
 # Load the coordinates from the JSON file
-with open('new.json', 'r') as f:
+with open('updated_new.json', 'r') as f:
     data = json.load(f)
     coordinates = data['coordinates']
 
@@ -36,7 +36,7 @@ def haversine_distance(station1, station2):
 def is_slope_acceptable(station1, station2):
     _, _, slope1 = stations[station1]
     _, _, slope2 = stations[station2]
-    max_slope = 75
+    max_slope = 10
     return max(slope1, slope2) <= max_slope
 
 # Initialize the pheromone trails
@@ -50,7 +50,7 @@ NUM_ANTS = 10
 ALPHA = 1.0
 BETA = 2.0
 RHO = 0.5
-MAX_ITERATIONS = 10
+MAX_ITERATIONS = 2
 
 # Perform the ACO algorithm
 best_path = None
@@ -132,37 +132,79 @@ for iteration in range(MAX_ITERATIONS):
             pheromones[(station1, station2)] = (1 - RHO) * pheromones[(station1, station2)] + RHO / path_distance
 
 # Visualize the solution on OpenStreetMap
-map = folium.Map()
+# map = folium.Map()
 
-for station, coords in stations.items():
-    lat, lon, _ = coords
-    folium.Marker(
-        location=[lat, lon],
-        icon=folium.Icon(color='red'),
-        tooltip=station
-    ).add_to(map)
+# for station, coords in stations.items():
+#     lat, lon, _ = coords
+#     folium.Marker(
+#         location=[lat, lon],
+#         icon=folium.Icon(color='red'),
+#         tooltip=station
+#     ).add_to(map)
 
-for i in range(len(best_path) - 1):
-    station1 = best_path[i]
-    station2 = best_path[i + 1]
-    lat1, lon1, _ = stations[station1]
-    lat2, lon2, _ = stations[station2]
-    folium.PolyLine(
-        locations=[(lat1, lon1), (lat2, lon2)],
-        color='green',
-        weight=2
-    ).add_to(map)
+# for i in range(len(best_path) - 1):
+#     station1 = best_path[i]
+#     station2 = best_path[i + 1]
+#     lat1, lon1, _ = stations[station1]
+#     lat2, lon2, _ = stations[station2]
+#     folium.PolyLine(
+#         locations=[(lat1, lon1), (lat2, lon2)],
+#         color='green',
+#         weight=2
+#     ).add_to(map)
 
-for station, coords in stations.items():
-    lat, lon, _ = coords
-    folium.Marker(
-        location=[lat, lon],
-        icon=folium.Icon(color='green'),
-        tooltip=station
-    ).add_to(map)
+# for station, coords in stations.items():
+#     lat, lon, _ = coords
+#     folium.Marker(
+#         location=[lat, lon],
+#         icon=folium.Icon(color='green'),
+#         tooltip=station
+#     ).add_to(map)
 
-map.save('railway_solution.html')
+# map.save('railway_solution.html')
 
-# Print the best path and its distance
-print(f"Best path: {' -> '.join(best_path)}")
-print(f"Best distance: {best_distance:.2f} km")
+
+first_station = stations[best_path[0]]
+map = folium.Map(location=[first_station[0], first_station[1]], zoom_start=10)
+
+# Add the best path to the map
+path_coordinates = []
+for station_name in best_path:
+    lat, lon, _ = stations[station_name]
+    path_coordinates.append([lat, lon])
+
+# Draw the path
+folium.PolyLine(
+    locations=path_coordinates,
+    color="red",
+    weight=3,
+    opacity=0.8
+).add_to(map)
+
+# Add markers for the start and end stations
+start_station = best_path[0]
+end_station = best_path[-1]
+
+folium.Marker(
+    location=stations[start_station][:2],
+    popup=f"Start: {start_station}",
+    icon=folium.Icon(color='green', icon='play')
+).add_to(map)
+
+folium.Marker(
+    location=stations[end_station][:2],
+    popup=f"End: {end_station}",
+    icon=folium.Icon(color='red', icon='stop')
+).add_to(map)
+
+# Save the map
+map.save('best_path_map.html')
+
+print("Map with the best path has been saved as 'best_path_map.html'")
+
+# Print the best path and its details
+print("Best path:")
+for i, station_name in enumerate(best_path):
+    print(f"{i+1}. {station_name}")
+
+print(f"\nTotal distance: {best_distance:.2f} km")
